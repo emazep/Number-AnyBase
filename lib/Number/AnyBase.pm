@@ -666,7 +666,7 @@ numbers size.
 
 =begin :list
 
-* With native perl integers, C<Number::AnyBase> is largely faster: something like over 15x faster in S<< decimal->base >> conversion and over 22x faster in S<< base->decimal >> conversion (using the C<Math::Base::Convert> object API, which is the recommended one for speed); C<fastnew> is over 70% faster than C<Math::Base::Convert::new>
+* With native perl integers, C<Number::AnyBase> is largely faster: something like over 15x faster in S<< decimal->base >> conversion and over 22x faster in S<< base->decimal >> conversion (using the C<Math::Base::Convert> object API, which is the recommended one for speed); C<fastnew> is over 70% faster than C<Math::Base::Convert::new>.
 * With big integers (60 digits), C<Number::AnyBase> (using C<Math::GMP>) is still faster: about 15% faster in S<< decimal->base >> conversion and about 100% faster in S<< base->decimal >> conversion.
 * Though generally better, C<Math::Base::Convert> preserves some of the C<Math::BaseConvert> API shortcomings: to convert numbers bidirectionally between base 10 to/from another given base, two different objects must be istantiated (or the bases must passed each time through the functional API).
 * C<Math::Base::Convert> lacks the fast native unary increment/decrement offered by C<Number::Anybase>, which permits an additional 2x speedup.

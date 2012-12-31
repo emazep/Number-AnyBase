@@ -9,4 +9,5 @@ inc/
 *.tmp
 *.bak
 *.stackdump
+.build/
 Number-AnyBase-*

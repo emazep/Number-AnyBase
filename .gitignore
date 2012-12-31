@@ -1,0 +1,11 @@
+.project
+.includepath
+META.yml
+Makefile
+pm_to_blib
+blib
+inc/
+*~
+*.tmp
+*.bak
+*.stackdump

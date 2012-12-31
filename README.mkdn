@@ -516,6 +516,10 @@ You can also look for information at:
 
     [http://rt.cpan.org/NoAuth/Bugs.html?Dist=Number-AnyBase](http://rt.cpan.org/NoAuth/Bugs.html?Dist=Number-AnyBase)
 
+- GitHub issues (you can also report bugs here)
+
+    [https://github.com/emazep/Number-AnyBase/issues](https://github.com/emazep/Number-AnyBase/issues)
+
 - AnnoCPAN: Annotated CPAN documentation
 
     [http://annocpan.org/dist/Number-AnyBase](http://annocpan.org/dist/Number-AnyBase)

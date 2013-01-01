@@ -355,11 +355,11 @@ currently indeterminate).
 
 It only accepts a listref.
 
-=head2 Specialized constructors
+=head3 Specialized Constructors
 
 Several constructors with ready-made alphabets are offered as well.
 
-=head3 C<new_urisafe>
+=head4 C<new_urisafe>
 
 It builds and returns a converter to/from an alphabet made by the I<unreserved
 URI characters>, as per the L<RFC3986|http://www.ietf.org/rfc/rfc3986.txt>.
@@ -367,49 +367,49 @@ More precisely, it is the same as:
 
     Number::AnyBase->fastnew( ['-', '.', '0'..'9', 'A'..'Z', '_', 'a'..'z', '~'] );
 
-=head3 C<new_base36>
+=head4 C<new_base36>
 
 The same as:
 
     Number::AnyBase->fastnew( ['0'..'9', 'A'..'Z'] );
 
-=head3 C<new_base62>
+=head4 C<new_base62>
 
 The same as:
 
     Number::AnyBase->fastnew( ['0'..'9', 'A'..'Z', 'a'..'z'] );
 
-=head3 C<new_base64>
+=head4 C<new_base64>
 
 The same as:
 
     Number::AnyBase->fastnew( ['A'..'Z', 'a'..'z', '0'..'9', '+', '/'] );
 
-=head3 C<new_base64url>
+=head4 C<new_base64url>
 
 The same as:
 
     Number::AnyBase->fastnew( ['A'..'Z', 'a'..'z', '0'..'9', '-', '_'] );
 
-=head3 C<new_bin>
+=head4 C<new_bin>
 
 It builds a binary converter. The same as:
 
     Number::AnyBase->fastnew( ['0', '1'] );
 
-=head3 C<new_oct>
+=head4 C<new_oct>
 
 It builds an octal converter. The same as:
 
     Number::AnyBase->fastnew( ['0'..'7'] )
 
-=head3 C<new_hex>
+=head4 C<new_hex>
 
 It builds an hexadecimal converter. The same as:
 
     Number::AnyBase->fastnew( ['0'..'9', 'A'..'F'] );
 
-=head3 C<new_ascii>
+=head4 C<new_ascii>
 
 It builds and returns a converter to/from an alphabet composed of all the
 printable ASCII characters except the space. More precisely, it is the same as:
@@ -614,7 +614,7 @@ numbers size.
 
 =begin :list
  
-* C<Number::AnyBase> is faster: S<< decimal->base >> conversion is about 2x (100%) faster, S<< base->decimal >> conversion is about the same, C<fastnew> is about 20% faster than C<Math::BaseCalc::new>.
+* C<Number::AnyBase> is faster: S<< decimal->base >> conversion is about 2x (100%) faster, S<< base->decimal >> conversion is about on par, C<fastnew> is about 20% faster than C<Math::BaseCalc::new>.
 * S<< Base->decimal >> conversion in C<Number::AnyBase> can return C<Math::BigInt> (or I<similar>) objects upon request, while C<Math::BaseCalc> only returns native perl integers, thus producing wrong results when the decimal number is too large.
 * C<Math::BaseCalc> lacks the fast native unary increment/decrement offered by C<Number::Anybase>, which permits an additional 2x speedup.
  
@@ -640,7 +640,7 @@ numbers size.
 
 * With native perl integers, C<Number::AnyBase> is hugely faster: something like 200x faster in S<< decimal->base >> conversion and 130x faster in S<< base->decimal >> conversion (using C<Math::BaseConvert::cnv>).
 * With big integers (60 digits), C<Number::AnyBase> (using C<Math::GMP>) is still faster: over 13x faster in both S<< decimal->base >> conversion and S<< base->decimal >> conversion; though much less, it's faster even using C<Math::BigInt> with its pure-perl backend.
-* C<Math::BaseConvert> has a weird API: first it has a functional interface, which is not ideal for code which has to maintain its internal state. Then, though a custom alphabet can be set (through a state-changing function called C<dig>), every time C<cnv> is called, the I<target> alphabet size must anyway be given.
+* C<Math::BaseConvert> has a weird API: first it has a functional interface, which is not ideal for code which has to maintain its internal state. Then, though a custom alphabet can be set (through a state-changing function called C<dig>), every time C<cnv> is called, the I<target> alphabet size must be passed anyway.
 * C<Math::BaseConvert> doesn't permit to use a bignum library other than C<Math::BigInt>, nor it permits to set any C<Math::BigInt> option.
 * C<Math::BaseConvert> lacks the fast native unary increment/decrement offered by C<Number::Anybase>, which permits an additional 2x speedup.
 
@@ -668,7 +668,7 @@ numbers size.
 
 * With native perl integers, C<Number::AnyBase> is largely faster: something like over 15x faster in S<< decimal->base >> conversion and over 22x faster in S<< base->decimal >> conversion (using the C<Math::Base::Convert> object API, which is the recommended one for speed); C<fastnew> is over 70% faster than C<Math::Base::Convert::new>.
 * With big integers (60 digits), C<Number::AnyBase> (using C<Math::GMP>) is still faster: about 15% faster in S<< decimal->base >> conversion and about 100% faster in S<< base->decimal >> conversion.
-* Though generally better, C<Math::Base::Convert> preserves some of the C<Math::BaseConvert> API shortcomings: to convert numbers bidirectionally between base 10 to/from another given base, two different objects must be istantiated (or the bases must passed each time through the functional API).
+* Though generally better, C<Math::Base::Convert> preserves some of the C<Math::BaseConvert> API shortcomings: to convert numbers bidirectionally between base 10 to/from another given base, two different objects must be istantiated (or the bases must be passed each time through the functional API).
 * C<Math::Base::Convert> lacks the fast native unary increment/decrement offered by C<Number::Anybase>, which permits an additional 2x speedup.
 * Possible minor glitch: some of the predefined alphabets offered by C<Math::Base::Convert> are not sorted.
 
@@ -679,7 +679,7 @@ numbers size.
 =begin :list
 
 * C<Math::Base::Convert> manages big numbers transparently and natively, i.e. without resorting to C<Math::BigInt> or similar modules (but, though not as pathologically slow as C<Math::BaseConvert>, this makes C<Math::Base::Convert> massively slow as well, when native perl integers can be used).
-* On big integers, if C<Number::AnyBase> uses C<Math::BigInt> with its pure-perl engine, C<Math::Base::Convert> is faster: about 11x in S<< decimal->base >> conversion and about 6x in in S<< base->decimal >> conversion (as already said, C<Number::AnyBase> can however use C<Math::GMP> and be faster even with big integers).
+* On big integers, if C<Number::AnyBase> uses C<Math::BigInt> with its pure-perl engine, C<Math::Base::Convert> is faster: about 11x in S<< decimal->base >> conversion and about 6x in in S<< base->decimal >> conversion (as already said, C<Number::AnyBase> can however use C<Math::GMP> and be faster even with big numbers).
 * C<Math::Base::Convert> can convert numbers between two arbitrary bases with a single call.
 * C<Math::Base::Convert> converts also negative integers.
 

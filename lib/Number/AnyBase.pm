@@ -92,6 +92,18 @@ sub new_urisafe {
     shift->fastnew( ['-', '.', '0'..'9', 'A'..'Z', '_', 'a'..'z', '~'] )
 }
 
+sub new_dna_lc {
+    shift->fastnew( ['a', 'c', 'g', 't'] )
+}
+
+sub new_dna_uc {
+    shift->fastnew( ['A', 'C', 'G', 'T'] )
+}
+
+sub new_byte {
+    shift->fastnew( [ map {chr} 0..255 ] )
+}
+
 sub new_ascii {
     shift->fastnew([
         '!', '"' , '#', '$', '%', '&', "'", '(', ')', '*', '+', '-', '.', '/',

@@ -2,6 +2,18 @@ Revision history for Number-AnyBase
 
 {{$NEXT}}
 
+   * Bug Fixes
+      * Contrary to the docs, base64 and base64url alphabets were not sorted.
+
+   * Code Enhancements
+      * Specialized constructors added: new_hex_lc, new_dna, new_dna_lc,
+        new_bytes.
+
+   * Doc Enhancements
+      * Recipes added to the COOKBOOK section: GUID Compression,
+        DNA compression, ASCII Armor.
+      * Several minor fixes and enhancements.
+
 1.00000       2012-12-31 07:05:49 Europe/Rome
 
    * First release.

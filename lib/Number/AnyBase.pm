@@ -589,8 +589,8 @@ This example shows how the I<bytes> alphabet can be used to effectively compress
 random data, when expressed in a shorter alphabet (the I<DNA alphabet> in
 this case).
 
-If the data are randomized (i.e. not skewed), this technique easily beats any
-compression algorithm.
+If the data are sufficiently randomized (i.e. not skewed), this technique easily
+beats most general purpose compression algorithms.
 
 As shown below, the conversion to the bytes alphabet produces about a 40%
 better compression than zip (with default options).
@@ -652,6 +652,12 @@ produced string has only I<safe> characters.
     GGCCTATCGGCGCTTCTACGGCCCGGTCTAGGGTGTCGCTCTGCTGGCCTGGCCGGCAACCCCAGTTCTGCTCCT
     CTCCAGGCACCCTTCTTTCCTCTTCCCCTTGCCCTTGCCCTGACCTCCCAGCCCTATGGATGTGGGGTCCCCATC
     ATCCCAGCTGCTCCCAAATAAACTCCAGAAG
+
+Of course there is nothing magic here: this technique simply leads to a 2-bit
+representation for the original symbols (being them just 4).
+For truly random data, this is the best that can be done however (compression
+algorithms specifically tailored for DNA sequences there exist, but they still
+leverage on some data pattern repetitions to get better results).
 
 =head2 Binary-to-text Encoding
 

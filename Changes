@@ -2,6 +2,10 @@ Revision history for Number-AnyBase
 
 {{$NEXT}}
 
+   * Doc Enhancements
+      * Some clarifications on the DNA Compression recipe in the COOKBOOK and
+        some other minor changes here and there.
+
 1.50000       2013-01-04 14:12:56 Europe/Rome
 
    * Bug Fixes
@@ -12,7 +16,7 @@ Revision history for Number-AnyBase
         new_bytes.
 
    * Doc Enhancements
-      * Recipes added to the COOKBOOK section: DNA compression,
+      * Recipes added to the COOKBOOK section: DNA Compression,
         Binary-to-text Encoding, UUID Compression.
       * Several minor fixes and enhancements.
 

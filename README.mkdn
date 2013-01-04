@@ -492,8 +492,8 @@ produced string has only _safe_ characters.
     ATCCCAGCTGCTCCCAAATAAACTCCAGAAG
 
 Of course there is nothing magic here: this technique simply leads to a 2-bit
-representation for the original symbols (being them 4).
-For truly random data, this the best that can be done however (compression
+representation for the original symbols (being them just 4).
+For truly random data, this is the best that can be done however (compression
 algorithms specifically tailored for DNA sequences there exist, but they still
 leverage on some data pattern repetitions to get better results).
 

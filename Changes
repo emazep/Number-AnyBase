@@ -2,6 +2,8 @@ Revision history for Number-AnyBase
 
 {{$NEXT}}
 
+1.50000       2013-01-04 14:12:56 Europe/Rome
+
    * Bug Fixes
       * Contrary to the docs, base64 and base64url alphabets were not sorted.
 

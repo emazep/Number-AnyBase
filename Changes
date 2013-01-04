@@ -2,6 +2,8 @@ Revision history for Number-AnyBase
 
 {{$NEXT}}
 
+1.60000       2013-01-04 19:04:33 Europe/Rome
+
    * Doc Fixes
       * The DNA Compression and the Binary-to-text Encoding recipes did not
         consider the zero-padding issue.

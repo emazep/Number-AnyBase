@@ -4,7 +4,7 @@ Number::AnyBase - Converts decimals to and from any alphabet of any size (for sh
 
 # VERSION
 
-version 1.50001
+version 1.50002
 
 # SYNOPSIS
 
@@ -547,19 +547,19 @@ even when converting (to decimals) from arbitrary alphabets.
     my $bytes_dec = Number::AnyBase->new_bytes->to_dec($bytes, Math::GMP->new);
     
 
-    my $bites_base64 = Number::AnyBase->new_base64->to_base($bytes_dec);
-    my $bites_ascii  = Number::AnyBase->new_ascii->to_base($bytes_dec);
+    my $bytes_base64 = Number::AnyBase->new_base64->to_base($bytes_dec);
+    my $bytes_ascii  = Number::AnyBase->new_ascii->to_base($bytes_dec);
     
 
     say length $bytes; # Original length
     
 
-    say length $bites_base64;
-    say length encode_base64($bytes); # Longer than $bites_base64
+    say length $bytes_base64;
+    say length encode_base64($bytes); # Longer than $bytes_base64
     
 
-    say length $bites_ascii;
-    say length ascii85_encode($bytes); # Longer than $bites_ascii
+    say length $bytes_ascii;
+    say length ascii85_encode($bytes); # Longer than $bytes_ascii
 
 The downside is that this technique becomes impractical (both in time and
 space efficiency) when the string to convert grows. It can however be applied

@@ -2,6 +2,10 @@ Revision history for Number-AnyBase
 
 {{$NEXT}}
 
+   * Doc Fixes
+      * The DNA Compression and the Binary-to-text Encoding recipes did not
+        consider the zero-padding issue.
+
 1.50002       2013-01-04 16:53:57 Europe/Rome
 
    * Doc Enhancements
@@ -15,7 +19,7 @@ Revision history for Number-AnyBase
 
 1.50000       2013-01-04 14:12:56 Europe/Rome
 
-   * Bug Fixes
+   * Code Fixes
       * Contrary to the docs, base64 and base64url alphabets were not sorted.
 
    * Code Enhancements

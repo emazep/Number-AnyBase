@@ -592,11 +592,16 @@ this case).
 If the data are sufficiently randomized (i.e. not skewed), this technique easily
 beats most general purpose compression algorithms.
 
-As shown below, the conversion to the bytes alphabet produces about a 40%
-better compression than zip (with default options).
+As shown below, in this particular case the conversion to the bytes alphabet
+produces about a 40% better compression than zip (with default options).
 Even the conversions to the I<urisafe> and to the printable ascii alphabets
 offer a better compression, and they have the additional advantage  that the
 produced string has only I<safe> characters.
+
+(Though not necessary in this particular case, to avoid any loss of data in the
+general case, a C<C> symbol has been prepended to the DNA string before the
+conversion to a decimal: it must be removed once the DNA string is restored from
+the decimal).
 
     use strict;
     use warnings;
@@ -614,7 +619,7 @@ produced string has only I<safe> characters.
     ( my $dnastring = do { local $/; <DATA> } ) =~ tr/\n//d;
     
     # dna string in decimal form (itself a compression)
-    my $dnastring_dec = Number::AnyBase->new_dna->to_dec($dnastring, Math::BigInt->new);
+    my $dnastring_dec = Number::AnyBase->new_dna->to_dec( 'C' . $dnastring, Math::BigInt->new );
     
     # Let's try several compressions
     my $dnastring_urisafe = Number::AnyBase->new_urisafe->to_base($dnastring_dec);
@@ -626,7 +631,7 @@ produced string has only I<safe> characters.
     
     # Check the length
     say length $dnastring;         # 1231 (original length)
-    say length $dnastring_dec;     #  741
+    say length $dnastring_dec;     #  742
     say length $dnastring_urisafe; #  408
     say length $dnastring_ascii;   #  377
     say length $dnastring_bytes;   #  308
@@ -657,7 +662,7 @@ Of course there is nothing magic here: this technique simply leads to a 2-bit
 representation for the original symbols (being them just 4).
 For truly random data, this is the best that can be done however (compression
 algorithms specifically tailored for DNA sequences there exist, but they still
-leverage on some data pattern repetitions to get better results).
+rely on some data pattern repetitions to get better results).
 
 =head2 Binary-to-text Encoding
 
@@ -672,14 +677,17 @@ Working on the whole original string rather than on blocks, the technique shown
 below easily beats any binary-to-text standard algorithm (the efficiency of
 which is measured by the shortness of the overhead added to the original data),
 such as L<Base64|http://en.wikipedia.org/wiki/Base64>
-or L<Ascii85|http://en.wikipedia.org/wiki/Ascii85>, even with the  optimizations
-offered by default by the L<Convert::Ascii85> CPAN module used here for
-comparison (to be fair, the C<Number::AnyBase> ascii alphabet has also more than
-85 symbols, but that's an C<Number::AnyBase> merit :-)
+or L<Ascii85|http://en.wikipedia.org/wiki/Ascii85> (to be fair, the
+C<Number::AnyBase> ascii alphabet has more than 85 symbols, but that's a
+C<Number::AnyBase> merit :-)
 
 Also note how, in order to maximize the efficiency, C<Number::AnyBase> lets
 freely choose the bignum library (in this case the excellent C<Math::GMP>),
 even when converting (to decimals) from arbitrary alphabets.
+
+(To avoid any loss of data, C<chr(1)> as been prepended to the binary string
+before the conversion to a decimal: it must be removed once the binary string is
+restored from the decimal).
 
     use strict;
     use warnings;
@@ -700,7 +708,7 @@ even when converting (to decimals) from arbitrary alphabets.
     $bytes .= chr int(256 * rand) for 1..1024;
     
     # byte string in decimal form
-    my $bytes_dec = Number::AnyBase->new_bytes->to_dec($bytes, Math::GMP->new);
+    my $bytes_dec = Number::AnyBase->new_bytes->to_dec( chr(1) . $bytes, Math::GMP->new );
     
     my $bytes_base64 = Number::AnyBase->new_base64->to_base($bytes_dec);
     my $bytes_ascii  = Number::AnyBase->new_ascii->to_base($bytes_dec);

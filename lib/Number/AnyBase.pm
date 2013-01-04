@@ -586,7 +586,7 @@ I<creative> uses, if a bit extravagant :-)
 =head2 DNA Compression
 
 This example shows how the I<bytes> alphabet can be used to effectively compress
-random data, when expressed in a shorter alphabet (the I<DNA> alphabet in
+random data, when expressed in a shorter alphabet (the I<DNA alphabet> in
 this case).
 
 If the data are randomized (i.e. not skewed), this technique easily beats any
@@ -659,8 +659,8 @@ In a sense, this example is the opposite of the previous one: this time the
 target alphabet is shorter than the source one, therefore the resulting string
 is longer than the original one. There is an advantage however: the resulting
 string contains only I<safe> characters (while the original string is in general
-binary), and can therefore be trasmitted/embedded where binary data would have
-caused problems.
+binary), and it can therefore be trasmitted/embedded where binary data would
+have caused problems.
 
 Working on the whole original string rather than on blocks, the technique shown
 below easily beats any binary-to-text standard algorithm (the efficiency of
@@ -673,7 +673,7 @@ comparison (to be fair, the C<Number::AnyBase> ascii alphabet has also more than
 
 Also note how, in order to maximize the efficiency, C<Number::AnyBase> lets
 freely choose the bignum library (in this case the excellent C<Math::GMP>),
-even when converting to decimals.
+even when converting (to decimals) from arbitrary alphabets.
 
     use strict;
     use warnings;

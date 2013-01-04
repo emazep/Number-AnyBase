@@ -759,7 +759,7 @@ long).
     say length($uuid) - 2;      # Original length (32)
     say length $base64url_uuid; # Max. 22, better than standard Base64
     say length $urisafe_uuid;   # Max. 22, sometimes better than the previous
-    say length $ascii_uuid;     # Max. 20, better than standard Base85
+    say length $ascii_uuid;     # Max. 20, better than standard Ascii85
 
 =head2 Security
 

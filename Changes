@@ -10,8 +10,8 @@ Revision history for Number-AnyBase
         new_bytes.
 
    * Doc Enhancements
-      * Recipes added to the COOKBOOK section: GUID Compression,
-        DNA compression, ASCII Armor.
+      * Recipes added to the COOKBOOK section: DNA compression,
+        Binary-to-text Encoding, UUID Compression.
       * Several minor fixes and enhancements.
 
 1.00000       2012-12-31 07:05:49 Europe/Rome

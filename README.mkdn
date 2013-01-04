@@ -4,7 +4,7 @@ Number::AnyBase - Converts decimals to and from any alphabet of any size (for sh
 
 # VERSION
 
-version 1.00000
+version 1.50000
 
 # SYNOPSIS
 
@@ -69,16 +69,18 @@ version 1.00000
 # DESCRIPTION
 
 First the intended usage scenario: this module has been conceived to shorten 
-ids, URLs etc., like the most popular URL shortening services do (think of 
-TinyURL and similar).
+ids, URLs etc., like the URL shortening services do (then it can be
+extended to some other mildly interesting uses: please see the ["COOKBOOK"](#COOKBOOK)
+section below).
 
 Then a bit of theory: an id is (or can anyway be mapped to) just a number,
 therefore it can be represented in any base. The longer is the alphabet of the
 base, the shorter the number representation will be (in terms of symbols of the
 said alphabet). This module converts any non-negative decimal integer (including
 [Math::BigInt](http://search.cpan.org/perldoc?Math::BigInt)\-compatible objects) to any given base/alphabet and vice versa,
-thus giving the shortest possible representation for the original number/id (at
-least for a _collision-free_ transformation).
+thus giving the shortest possible representation for the original number/id
+(provided that we are dealing with a _collision-free_ transformation of random,
+non-skewed data).
 
 The suggested workflow to shorten your ids is therefore the following:
 
@@ -198,11 +200,11 @@ currently indeterminate).
 
 It only accepts a listref.
 
-## Specialized constructors
+### Specialized Constructors
 
 Several constructors with ready-made alphabets are offered as well.
 
-### `new_urisafe`
+#### `new_urisafe`
 
 It builds and returns a converter to/from an alphabet made by the _unreserved
 URI characters_, as per the [RFC3986](http://www.ietf.org/rfc/rfc3986.txt).
@@ -210,49 +212,67 @@ More precisely, it is the same as:
 
     Number::AnyBase->fastnew( ['-', '.', '0'..'9', 'A'..'Z', '_', 'a'..'z', '~'] );
 
-### `new_base36`
+#### `new_base36`
 
 The same as:
 
     Number::AnyBase->fastnew( ['0'..'9', 'A'..'Z'] );
 
-### `new_base62`
+#### `new_base62`
 
 The same as:
 
     Number::AnyBase->fastnew( ['0'..'9', 'A'..'Z', 'a'..'z'] );
 
-### `new_base64`
+#### `new_base64`
 
 The same as:
 
     Number::AnyBase->fastnew( ['A'..'Z', 'a'..'z', '0'..'9', '+', '/'] );
 
-### `new_base64url`
+#### `new_base64url`
 
 The same as:
 
     Number::AnyBase->fastnew( ['A'..'Z', 'a'..'z', '0'..'9', '-', '_'] );
 
-### `new_bin`
+#### `new_bin`
 
 It builds a binary converter. The same as:
 
     Number::AnyBase->fastnew( ['0', '1'] );
 
-### `new_oct`
+#### `new_oct`
 
 It builds an octal converter. The same as:
 
     Number::AnyBase->fastnew( ['0'..'7'] )
 
-### `new_hex`
+#### `new_hex`
 
 It builds an hexadecimal converter. The same as:
 
     Number::AnyBase->fastnew( ['0'..'9', 'A'..'F'] );
 
-### `new_ascii`
+#### `new_hex_lc`
+
+The same as above, except that the alphabet is lower-cased:
+
+    Number::AnyBase->fastnew( ['0'..'9', 'a'..'f'] );
+
+#### `new_dna`
+
+It builds a converter for DNA sequences. The same as:
+
+    Number::AnyBase->fastnew( ['A', 'C', 'G', 'T'] );
+
+#### `new_dna_lc`
+
+The same as above, except that the alphabet is lower-cased:
+
+    Number::AnyBase->fastnew( ['a', 'c', 'g', 't'] );
+
+#### `new_ascii`
 
 It builds and returns a converter to/from an alphabet composed of all the
 printable ASCII characters except the space. More precisely, it is the same as:
@@ -262,6 +282,17 @@ printable ASCII characters except the space. More precisely, it is the same as:
         '0'..'9' , ':', ';', '<', '=', '>', '?', '@', 'A'..'Z',
         '[', '\\', ']', '^', '_', '`', 'a'..'z', '{', '|', '}', '~'
     ]);
+
+#### `new_bytes`
+
+It builds a converter to/from an alphabet which includes all the binary octets
+from `0x0` to `0xFF`. The same as:
+
+    Number::AnyBase->fastnew( [ map {chr} 0..255 ] );
+
+It is useful to convert from/to binary data (for an example, please see the
+["DNA Compression"](#DNA Compression) or the ["Binary-to-text Encoding"](#Binary-to-text Encoding) recipes in the
+["COOKBOOK"](#COOKBOOK) section below).
 
 ## `to_base`
 
@@ -292,7 +323,8 @@ pass any such _big number_ and you will get the correct result:
 
 This permits to freely choose any [Math::BigInt](http://search.cpan.org/perldoc?Math::BigInt) _option_ (the
 _accuracy_, as shown above, or the _backend library_ etc.), or to use any
-other compatible class, such as, for example, [Math::GMP](http://search.cpan.org/perldoc?Math::GMP).
+other compatible class, such as, for example, [Math::GMP](http://search.cpan.org/perldoc?Math::GMP) or [Math::Int128](http://search.cpan.org/perldoc?Math::Int128)
+(in this latter case, if the number size permits its use).
 
 ## `to_dec`
 
@@ -311,14 +343,15 @@ It accepts a second optional parameter, which should be a
 [Math::BigInt](http://search.cpan.org/perldoc?Math::BigInt)\-compatible object (it does not matter if it is initialized or
 not), which tells `to_base` that a _bignum_ result is requested. It is
 necessary only when the result is too large to be held by a native perl
-integer (though, other than slowing down the conversion, it does not harm
-anyway).
+integer (though, other than slowing down the conversion, it does not cause
+any harm, so in case of doubt it can be used anyway).
 
-The passed bignum object is used for the internal calculations so, though
+The passed bignum object is then used for the internal calculations so, though
 unusual, this interface permits to have the maximum flexibility, as it
-completely decouples the _bignum_ library, permitting the user to freely choose
+completely decouples the _bignum_ library, allowing the user to freely choose
 any [Math::BigInt](http://search.cpan.org/perldoc?Math::BigInt) _option_ as well as any (faster) [Math::BigInt](http://search.cpan.org/perldoc?Math::BigInt)\-compatible
-alternative (such as [Math::GMP](http://search.cpan.org/perldoc?Math::GMP)):
+alternative (such as [Math::GMP](http://search.cpan.org/perldoc?Math::GMP), or [Math::Int128](http://search.cpan.org/perldoc?Math::Int128) when permitted by the
+number size):
 
     use Math::BigInt; # Or use Math::GMP;
     Math::BigInt->accuracy(60); # For example
@@ -351,7 +384,7 @@ last (converted) id stored in a db, for example.
 
 ## `prev`
 
-- `$string = $converter->prev($base_num)`
+- `$string = $converter->prev( $base_num )`
 
 This method performs an optimized _native_ unary decrement on the given
 converted number/string, returning the previous number/string in the current
@@ -373,6 +406,200 @@ Read-only method which returns the alphabet of the current _target_ base, as a
 listref.
 
 # COOKBOOK
+
+This section contains some general advices, together with some examples of
+_creative_ uses, if a bit extravagant :-)
+
+## DNA Compression
+
+This example shows how the _bytes_ alphabet can be used to effectively compress
+random data, when expressed in a shorter alphabet (the _DNA_ alphabet in
+this case).
+
+If the data are randomized (i.e. not skewed), this technique easily beats any
+compression algorithm.
+
+As shown below, the conversion to the bytes alphabet produces about a 40%
+better compression than zip (with default options).
+Even the conversions to the _urisafe_ and to the printable ascii alphabets
+offer a better compression, and they have the additional advantage  that the
+produced string has only _safe_ characters.
+
+    use strict;
+    use warnings;
+    
+
+    use feature 'say';
+    
+
+    use Number::AnyBase;
+    use Math::BigInt; # Or use Math::GMP for speed
+    
+
+    # For comparison
+    use IO::Compress::Zip qw(zip);
+    
+
+    $| = 1;
+    
+
+    ( my $dnastring = do { local $/; <DATA> } ) =~ tr/\n//d;
+    
+
+    # dna string in decimal form (itself a compression)
+    my $dnastring_dec = Number::AnyBase->new_dna->to_dec($dnastring, Math::BigInt->new);
+    
+
+    # Let's try several compressions
+    my $dnastring_urisafe = Number::AnyBase->new_urisafe->to_base($dnastring_dec);
+    my $dnastring_ascii   = Number::AnyBase->new_ascii->to_base($dnastring_dec);
+    my $dnastring_bytes   = Number::AnyBase->new_bytes->to_base($dnastring_dec);
+    
+
+    # zip with default options for comparison
+    zip \$dnastring, \my $dnastring_zipped;
+    
+
+    # Check the length
+    say length $dnastring;         # 1231 (original length)
+    say length $dnastring_dec;     #  741
+    say length $dnastring_urisafe; #  408
+    say length $dnastring_ascii;   #  377
+    say length $dnastring_bytes;   #  308
+    
+
+    say length $dnastring_zipped;  #  515
+    
+
+    # Real human gene for bone gla protein (BGP)
+    __DATA__
+    GGCAGATTCCCCCTAGACCCGCCCGCACCATGGTCAGGCATGCCCCTCCTCATCGCTGGGCACAGCCCAGAGGGT
+    ATAAACAGTGCTGGAGGCTGGCGGGGCAGGCCAGCTGAGTCCTGAGCAGCAGCCCAGCGCAGCCACCGAGACACC
+    ATGAGAGCCCTCACACTCCTCGCCCTATTGGCCCTGGCCGCACTTTGCATCGCTGGCCAGGCAGGTGAGTGCCCC
+    CACCTCCCCTCAGGCCGCATTGCAGTGGGGGCTGAGAGGAGGAAGCACCATGGCCCACCTCTTCTCACCCCTTTG
+    GCTGGCAGTCCCTTTGCAGTCTAACCACCTTGTTGCAGGCTCAATCCATTTGCCCCAGCTCTGCCCTTGCAGAGG
+    GAGAGGAGGGAAGAGCAAGCTGCCCGAGACGCAGGGGAAGGAGGATGAGGGCCCTGGGGATGAGCTGGGGTGAAC
+    CAGGCTCCCTTTCCTTTGCAGGTGCGAAGCCCAGCGGTGCAGAGTCCAGCAAAGGTGCAGGTATGAGGATGGACC
+    TGATGGGTTCCTGGACCCTCCCCTCTCACCCTGGTCCCTCAGTCTCATTCCCCCACTCCTGCCACCTCCTGTCTG
+    GCCATCAGGAAGGCCAGCCTGCTCCCCACCTGATCCTCCCAAACCCAGAGCCACCTGATGCCTGCCCCTCTGCTC
+    CACAGCCTTTGTGTCCAAGCAGGAGGGCAGCGAGGTAGTGAAGAGACCCAGGCGCTACCTGTATCAATGGCTGGG
+    GTGAGAGAAAAGGCAGAGCTGGGCCAAGGCCCTGCCTCTCCGGGATGGTCTGTGGGGGAGCTGCAGCAGGGAGTG
+    GCCTCTCTGGGTTGTGGTGGGGGTACAGGCAGCCTGCCCTGGTGGGCACCCTGGAGCCCCATGTGTAGGGAGAGG
+    AGGGATGGGCATTTTGCACGGGGGCTGATGCCACCACGTCGGGTGTCTCAGAGCCCCAGTCCCCTACCCGGATCC
+    CCTGGAGCCCAGGAGGGAGGTGTGTGAGCTCAATCCGGACTGTGACGAGTTGGCTGACCACATCGGCTTTCAGGA
+    GGCCTATCGGCGCTTCTACGGCCCGGTCTAGGGTGTCGCTCTGCTGGCCTGGCCGGCAACCCCAGTTCTGCTCCT
+    CTCCAGGCACCCTTCTTTCCTCTTCCCCTTGCCCTTGCCCTGACCTCCCAGCCCTATGGATGTGGGGTCCCCATC
+    ATCCCAGCTGCTCCCAAATAAACTCCAGAAG
+
+## Binary-to-text Encoding
+
+In a sense, this example is the opposite of the previous one: this time the
+target alphabet is shorter than the source one, therefore the resulting string
+is longer than the original one. There is an advantage however: the resulting
+string contains only _safe_ characters (while the original string is in general
+binary), and can therefore be trasmitted/embedded where binary data would have
+caused problems.
+
+Working on the whole original string rather than on blocks, the technique shown
+below easily beats any binary-to-text standard algorithm (the efficiency of
+which is measured by the shortness of the overhead added to the original data),
+such as [Base64](http://en.wikipedia.org/wiki/Base64)
+or [Ascii85](http://en.wikipedia.org/wiki/Ascii85), even with the  optimizations
+offered by default by the [Convert::Ascii85](http://search.cpan.org/perldoc?Convert::Ascii85) CPAN module used here for
+comparison (to be fair, the `Number::AnyBase` ascii alphabet has also more than
+85 symbols, but that's an `Number::AnyBase` merit :-)
+
+Also note how, in order to maximize the efficiency, `Number::AnyBase` lets
+freely choose the bignum library (in this case the excellent `Math::GMP`),
+even when converting to decimals.
+
+    use strict;
+    use warnings;
+    
+
+    use feature 'say';
+    
+
+    use Number::AnyBase;
+    use Math::GMP; # For speed
+    
+
+    # For Comparison
+    use MIME::Base64;
+    use Convert::Ascii85 qw(ascii85_encode);
+    
+
+    $| = 1;
+    
+
+    # Generic binary data
+    my $bytes = '';
+    $bytes .= chr int(256 * rand) for 1..1024;
+    
+
+    # byte string in decimal form
+    my $bytes_dec = Number::AnyBase->new_bytes->to_dec($bytes, Math::GMP->new);
+    
+
+    my $bites_base64 = Number::AnyBase->new_base64->to_base($bytes_dec);
+    my $bites_ascii  = Number::AnyBase->new_ascii->to_base($bytes_dec);
+    
+
+    say length $bytes; # Original length
+    
+
+    say length $bites_base64;
+    say length encode_base64($bytes); # Longer than $bites_base64
+    
+
+    say length $bites_ascii;
+    say length ascii85_encode($bytes); # Longer than $bites_ascii
+
+The downside is that this technique becomes impractical (both in time and
+space efficiency) when the string to convert grows. It can however be applied
+block-by-block, say up to blocks of (few) tens of Kbytes, still producing
+the best results.
+
+## UUIDs compression
+
+This example is a mix of the previous two: using a longer alphabet, it
+compresses the original (hexadecimal) UUID, but it keeps also the UUID textual.
+
+Once again it is shown how, in order to maximize the efficiency,
+`Number::AnyBase` can freely choose the bignum library to use: in this case the
+excellent `Math::Int128` (which fits perfectly, being an UUID exactly 128-bit
+long).
+
+    use strict;
+    use warnings;
+    
+
+    use feature 'say';
+    
+
+    use Math::Int128 qw(string_to_uint128); # For maximum speed
+    use Data::UUID;
+    use Number::AnyBase;
+    
+
+    $| = 1;
+    
+
+    my $uuid = Data::UUID->new->create_hex;
+    my $dec_uuid = string_to_uint128($uuid);
+    
+
+    # Let's try several compressions
+    my $base64url_uuid = Number::AnyBase->new_base64url->to_base($dec_uuid);
+    my $urisafe_uuid   = Number::AnyBase->new_urisafe->to_base($dec_uuid);
+    my $ascii_uuid     = Number::AnyBase->new_ascii->to_base($dec_uuid);
+    
+
+    # Check the length
+    say length($uuid) - 2;      # Original length (32)
+    say length $base64url_uuid; # Max. 22, better than standard Base64
+    say length $urisafe_uuid;   # Max. 22, sometimes better than the previous
+    say length $ascii_uuid;     # Max. 20, better than standard Base85
 
 ## Security
 
@@ -411,6 +638,7 @@ Big numbers of course slow down the conversions but, as shown above,
 performances can be fine-tuned, for example by properly setting the
 [Math::BigInt](http://search.cpan.org/perldoc?Math::BigInt) precision and accuracy, by choosing a faster back-end library,
 or by using [Math::GMP](http://search.cpan.org/perldoc?Math::GMP) directly in place of [Math::BigInt](http://search.cpan.org/perldoc?Math::BigInt) (advised).
+If permitted by the number size, [Math::Int128](http://search.cpan.org/perldoc?Math::Int128) is an even faster alternative.
 
 As already said, the optimized native unary increment \[decrement\] provided by
 `next` \[`prev`\] is over 2x faster than the `to_dec`/`to_base` conversion
@@ -425,16 +653,16 @@ amortized, using `to_base()` (only) is marginally faster than using `next`:
     
 
     my $conv = Number::AnyBase->new( 0..9, 'A'..'Z', 'a'..'z' );
-    my (@seq1, @seq2);
+    my (@seq1, @seq2); # They will contain the same sequence, through different methods
     my $base_num = 'zzzzzz';
     
 
-    # @seq1 construction through native increment:
+    # @seq1 construction through native increment
     my $next = $base_num;
     push @seq1, $next = $conv->next($next) for 1..SEQ_LENGTH;
     
 
-    # @seq2 construction through to_base is marginally faster than @seq1:
+    # @seq2 construction through to_base; marginally faster than @seq1
     my $dec_num = $conv->to_dec($base_num);
     push @seq2, $conv->to_base( $dec_num + $_ ) for 1..SEQ_LENGTH;
 
@@ -448,12 +676,12 @@ Here is a brief and __completely biased__ comparison with [Math::BaseCalc](http:
 
 For the performance claims, please see the
 `benchmark/other\_cpan\_modules.pl` benchmark script included in the
-distribution. Also note that the coversion speed gaps tend to increase with the
+distribution. Also note that the conversion speed gaps tend to increase with the
 numbers size.
 
 - vs `Math::BaseCalc`
     - Pros
-        - `Number::AnyBase` is faster: decimal->base conversion is about 2x (100%) faster, base->decimal conversion is about the same, `fastnew` is about 20% faster than `Math::BaseCalc::new`.
+        - `Number::AnyBase` is faster: decimal->base conversion is about 2x (100%) faster, base->decimal conversion is about on par, `fastnew` is about 20% faster than `Math::BaseCalc::new`.
         - Base->decimal conversion in `Number::AnyBase` can return `Math::BigInt` (or _similar_) objects upon request, while `Math::BaseCalc` only returns native perl integers, thus producing wrong results when the decimal number is too large.
         - `Math::BaseCalc` lacks the fast native unary increment/decrement offered by `Number::Anybase`, which permits an additional 2x speedup.
     - Cons
@@ -462,37 +690,40 @@ numbers size.
     - Pros
         - With native perl integers, `Number::AnyBase` is hugely faster: something like 200x faster in decimal->base conversion and 130x faster in base->decimal conversion (using `Math::BaseConvert::cnv`).
         - With big integers (60 digits), `Number::AnyBase` (using `Math::GMP`) is still faster: over 13x faster in both decimal->base conversion and base->decimal conversion; though much less, it's faster even using `Math::BigInt` with its pure-perl backend.
-        - `Math::BaseConvert` has a weird API: first it has a functional interface, which is not ideal for code which has to maintain its internal state. Then, though a custom alphabet can be set (through a state-changing function called `dig`), every time `cnv` is called, the _target_ alphabet size must anyway be given.
+        - `Math::BaseConvert` has a weird API: first it has a functional interface, which is not ideal for code which has to maintain its internal state. Then, though a custom alphabet can be set (through a state-changing function called `dig`), every time `cnv` is called, the _target_ alphabet size must be passed anyway.
         - `Math::BaseConvert` doesn't permit to use a bignum library other than `Math::BigInt`, nor it permits to set any `Math::BigInt` option.
         - `Math::BaseConvert` lacks the fast native unary increment/decrement offered by `Number::Anybase`, which permits an additional 2x speedup.
     - Cons
         - `Math::BaseConvert` manages big numbers transparently (but this makes it extremely slow and does not permit to use a library other than `Math::BigInt`, as already said).
-        - `Math::BaseConvert` can convert numbers between two arbitrary bases with a single call.
+        - `Math::BaseConvert` can convert numbers between two arbitrary bases with a single function call.
         - `Math::BaseConvert` converts also negative integers.
 - vs `Math::Base::Convert`
     - Pros
-        - With native perl integers, `Number::AnyBase` is largely faster: something like over 15x faster in decimal->base conversion and over 22x faster in base->decimal conversion (using the `Math::Base::Convert` object API, which is the recommended one for speed); `fastnew` is over 70% faster than `Math::Base::Convert::new`
+        - With native perl integers, `Number::AnyBase` is largely faster: something like over 15x faster in decimal->base conversion and over 22x faster in base->decimal conversion (using the `Math::Base::Convert` object API, which is the recommended one for speed); `fastnew` is over 70% faster than `Math::Base::Convert::new`.
         - With big integers (60 digits), `Number::AnyBase` (using `Math::GMP`) is still faster: about 15% faster in decimal->base conversion and about 100% faster in base->decimal conversion.
-        - Though generally better, `Math::Base::Convert` preserves some of the `Math::BaseConvert` API shortcomings: to convert numbers bidirectionally between base 10 to/from another given base, two different objects must be istantiated (or the bases must passed each time through the functional API).
+        - Though generally better, `Math::Base::Convert` preserves some of the `Math::BaseConvert` API shortcomings: to convert numbers bidirectionally between base 10 to/from another given base, two different objects must be istantiated (or the bases must be passed each time through the functional API).
         - `Math::Base::Convert` lacks the fast native unary increment/decrement offered by `Number::Anybase`, which permits an additional 2x speedup.
         - Possible minor glitch: some of the predefined alphabets offered by `Math::Base::Convert` are not sorted.
     - Cons
-        - `Math::Base::Convert` manages big numbers transparently and natively, i.e. without resorting to `Math::BigInt` or similar modules (but, though not as pathologically slow as `Math::BaseConvert`, this makes `Math::Base::Convert` massively slow as well, when native perl integers can be used).
-        - On big integers, if `Number::AnyBase` uses `Math::BigInt` with its pure-perl engine, `Math::Base::Convert` is faster: about 11x in decimal->base conversion and about 6x in in base->decimal conversion (as already said, `Number::AnyBase` can however use `Math::GMP` and be faster even with big integers).
-        - `Math::Base::Convert` can convert numbers between two arbitrary bases with a single call.
+        - `Math::Base::Convert` manages big numbers transparently and natively, i.e. without resorting to `Math::BigInt` or similar modules (but, though not as slow as `Math::BaseConvert`, this makes `Math::Base::Convert` massively slow as well, when native perl integers can be used).
+        - On big integers, if `Number::AnyBase` uses `Math::BigInt` with its pure-perl engine, `Math::Base::Convert` is faster: about 11x in decimal->base conversion and about 6x in in base->decimal conversion (as already said, `Number::AnyBase` can however use `Math::GMP` and be faster even with big numbers).
+        - `Math::Base::Convert` can convert numbers between two arbitrary bases with a single function call.
         - `Math::Base::Convert` converts also negative integers.
 
 All of the reviewed modules are _pure-perled_, though the `Math::GMP` module
 that `Number::AnyBase` can (optionally) use to maximize its speed with big
 numbers it's not.
 Note however that the `Number::AnyBase` fast native unary increment/decrement
-work even on big numbers without any external module.
+work on arbitrarily big numbers without any external module.
 
 # SEE ALSO
 
 - [Math::BaseCalc](http://search.cpan.org/perldoc?Math::BaseCalc)
 - [Math::BaseConvert](http://search.cpan.org/perldoc?Math::BaseConvert)
 - [Math::Base::Convert](http://search.cpan.org/perldoc?Math::Base::Convert)
+- [Math::BigInt](http://search.cpan.org/perldoc?Math::BigInt)
+- [Math::GMP](http://search.cpan.org/perldoc?Math::GMP)
+- [Math::Int128](http://search.cpan.org/perldoc?Math::Int128)
 
 # BUGS
 
@@ -534,8 +765,8 @@ You can also look for information at:
 
 # ACKNOWLEDGEMENTS
 
-Many thanks to the IPW (Italian Perl Workshop) organizers and sponsors: they
-run a fascinating an inspiring event.
+Many thanks to the IPW (Italian Perl Workshop) organizers, sponsors and
+speakers: they run a fascinating an inspiring event.
 
 # AUTHOR
 
@@ -543,7 +774,7 @@ Emanuele Zeppieri <emazep@cpan.org>
 
 # COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Emanuele Zeppieri.
+This software is copyright (c) 2013 by Emanuele Zeppieri.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

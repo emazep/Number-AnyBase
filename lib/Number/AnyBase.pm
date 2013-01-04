@@ -260,8 +260,8 @@ __END__
 
 First the intended usage scenario: this module has been conceived to shorten 
 ids, URLs etc., like the URL shortening services do (then it can be
-extended to some other interesting uses, if a bit extravagant: please see the
-L</COOKBOOK> section below).
+extended to some other mildly interesting uses: please see the L</COOKBOOK>
+section below).
 
 Then a bit of theory: an id is (or can anyway be mapped to) just a number,
 therefore it can be represented in any base. The longer is the alphabet of the
@@ -427,6 +427,12 @@ It builds an hexadecimal converter. The same as:
 
     Number::AnyBase->fastnew( ['0'..'9', 'A'..'F'] );
 
+=head4 C<new_hex_lc>
+
+The same as above, except that the alphabet is lower-cased:
+
+    Number::AnyBase->fastnew( ['0'..'9', 'a'..'f'] );
+
 =head4 C<new_dna>
 
 It builds a converter for DNA sequences. The same as:
@@ -457,9 +463,9 @@ from C<0x0> to C<0xFF>. The same as:
 
     Number::AnyBase->fastnew( [ map {chr} 0..255 ] );
 
-It is useful to read from/write to binary data (for an example, please see the
-L</DNA Compression> or the L</ASCII Armor> recipes in the L</COOKBOOK> section
-below).
+It is useful to convert from/to binary data (for an example, please see the
+L</DNA Compression> or the L</Binary-to-text Encoding> recipes in the
+L</COOKBOOK> section below).
 
 =head2 C<to_base>
 
@@ -573,6 +579,173 @@ Read-only method which returns the alphabet of the current I<target> base, as a
 listref.
 
 =head1 COOKBOOK
+
+This section contains some general advices, together with some examples of
+I<creative> uses, if a bit extravagant :-)
+
+=head2 DNA Compression
+
+This example shows how the I<bytes> alphabet can be used to effectively compress
+random data, when expressed in a shorter alphabet (the I<DNA> alphabet in
+this case).
+
+If the data are randomized (i.e. not skewed), this technique easily beats any
+compression algorithm.
+
+As shown below, the conversion to the bytes alphabet produces about a 40%
+better compression than zip (with default options).
+Even the conversions to the I<urisafe> and to the printable ascii alphabets
+offer a better compression, and they have the additional advantage  that the
+produced string has only I<safe> characters.
+
+    use strict;
+    use warnings;
+    
+    use feature 'say';
+    
+    use Number::AnyBase;
+    use Math::BigInt; # Or use Math::GMP for speed
+    
+    # For comparison
+    use IO::Compress::Zip qw(zip);
+    
+    $| = 1;
+    
+    ( my $dnastring = do { local $/; <DATA> } ) =~ tr/\n//d;
+    
+    # dna string in decimal form (itself a compression)
+    my $dnastring_dec = Number::AnyBase->new_dna->to_dec($dnastring, Math::BigInt->new);
+    
+    # Let's try several compressions
+    my $dnastring_urisafe = Number::AnyBase->new_urisafe->to_base($dnastring_dec);
+    my $dnastring_ascii   = Number::AnyBase->new_ascii->to_base($dnastring_dec);
+    my $dnastring_bytes   = Number::AnyBase->new_bytes->to_base($dnastring_dec);
+    
+    # zip with default options for comparison
+    zip \$dnastring, \my $dnastring_zipped;
+    
+    # Check the length
+    say length $dnastring;         # 1231 (original length)
+    say length $dnastring_dec;     #  741
+    say length $dnastring_urisafe; #  408
+    say length $dnastring_ascii;   #  377
+    say length $dnastring_bytes;   #  308
+    
+    say length $dnastring_zipped;  #  515
+    
+    # Real human gene for bone gla protein (BGP)
+    __DATA__
+    GGCAGATTCCCCCTAGACCCGCCCGCACCATGGTCAGGCATGCCCCTCCTCATCGCTGGGCACAGCCCAGAGGGT
+    ATAAACAGTGCTGGAGGCTGGCGGGGCAGGCCAGCTGAGTCCTGAGCAGCAGCCCAGCGCAGCCACCGAGACACC
+    ATGAGAGCCCTCACACTCCTCGCCCTATTGGCCCTGGCCGCACTTTGCATCGCTGGCCAGGCAGGTGAGTGCCCC
+    CACCTCCCCTCAGGCCGCATTGCAGTGGGGGCTGAGAGGAGGAAGCACCATGGCCCACCTCTTCTCACCCCTTTG
+    GCTGGCAGTCCCTTTGCAGTCTAACCACCTTGTTGCAGGCTCAATCCATTTGCCCCAGCTCTGCCCTTGCAGAGG
+    GAGAGGAGGGAAGAGCAAGCTGCCCGAGACGCAGGGGAAGGAGGATGAGGGCCCTGGGGATGAGCTGGGGTGAAC
+    CAGGCTCCCTTTCCTTTGCAGGTGCGAAGCCCAGCGGTGCAGAGTCCAGCAAAGGTGCAGGTATGAGGATGGACC
+    TGATGGGTTCCTGGACCCTCCCCTCTCACCCTGGTCCCTCAGTCTCATTCCCCCACTCCTGCCACCTCCTGTCTG
+    GCCATCAGGAAGGCCAGCCTGCTCCCCACCTGATCCTCCCAAACCCAGAGCCACCTGATGCCTGCCCCTCTGCTC
+    CACAGCCTTTGTGTCCAAGCAGGAGGGCAGCGAGGTAGTGAAGAGACCCAGGCGCTACCTGTATCAATGGCTGGG
+    GTGAGAGAAAAGGCAGAGCTGGGCCAAGGCCCTGCCTCTCCGGGATGGTCTGTGGGGGAGCTGCAGCAGGGAGTG
+    GCCTCTCTGGGTTGTGGTGGGGGTACAGGCAGCCTGCCCTGGTGGGCACCCTGGAGCCCCATGTGTAGGGAGAGG
+    AGGGATGGGCATTTTGCACGGGGGCTGATGCCACCACGTCGGGTGTCTCAGAGCCCCAGTCCCCTACCCGGATCC
+    CCTGGAGCCCAGGAGGGAGGTGTGTGAGCTCAATCCGGACTGTGACGAGTTGGCTGACCACATCGGCTTTCAGGA
+    GGCCTATCGGCGCTTCTACGGCCCGGTCTAGGGTGTCGCTCTGCTGGCCTGGCCGGCAACCCCAGTTCTGCTCCT
+    CTCCAGGCACCCTTCTTTCCTCTTCCCCTTGCCCTTGCCCTGACCTCCCAGCCCTATGGATGTGGGGTCCCCATC
+    ATCCCAGCTGCTCCCAAATAAACTCCAGAAG
+
+=head2 Binary-to-text Encoding
+
+In a sense, this example is the opposite of the previous one: this time the
+target alphabet is shorter than the source one, therefore the resulting string
+is longer than the original one. There is an advantage however: the resulting
+string contains only I<safe> characters (while the original string is in general
+binary), and can therefore be trasmitted/embedded where binary data would have
+caused problems.
+
+Working on the whole original string rather than on blocks, the technique shown
+below easily beats any binary-to-text standard algorithm (the efficiency of
+which is measured by the shortness of the overhead added to the original data),
+such as L<Base64|http://en.wikipedia.org/wiki/Base64>
+or L<Ascii85|http://en.wikipedia.org/wiki/Ascii85>, even with the  optimizations
+offered by default by the L<Convert::Ascii85> CPAN module used here for
+comparison (to be fair, the C<Number::AnyBase> ascii alphabet has also more than
+85 symbols, but that's an C<Number::AnyBase> merit :-)
+
+Also note how, in order to maximize the efficiency, C<Number::AnyBase> lets
+freely choose the bignum library (in this case the excellent C<Math::GMP>),
+even when converting to decimals.
+
+    use strict;
+    use warnings;
+    
+    use feature 'say';
+    
+    use Number::AnyBase;
+    use Math::GMP; # For speed
+    
+    # For Comparison
+    use MIME::Base64;
+    use Convert::Ascii85 qw(ascii85_encode);
+    
+    $| = 1;
+    
+    # Generic binary data
+    my $bytes = '';
+    $bytes .= chr int(256 * rand) for 1..1024;
+    
+    # byte string in decimal form
+    my $bytes_dec = Number::AnyBase->new_bytes->to_dec($bytes, Math::GMP->new);
+    
+    my $bites_base64 = Number::AnyBase->new_base64->to_base($bytes_dec);
+    my $bites_ascii  = Number::AnyBase->new_ascii->to_base($bytes_dec);
+    
+    say length $bytes; # Original length
+    
+    say length $bites_base64;
+    say length encode_base64($bytes); # Longer than $bites_base64
+    
+    say length $bites_ascii;
+    say length ascii85_encode($bytes); # Longer than $bites_ascii
+
+The downside is that this technique becomes impractical (both in time and
+space efficiency) when the string to convert grows. It can however be applied
+block-by-block, say up to blocks of (few) tens of Kbytes, still producing
+the best results.
+
+=head2 UUIDs compression
+
+This example is a mix of the previous two: using a longer alphabet, it
+compresses the original (hexadecimal) UUID, but it keeps also the UUID textual.
+
+Once again it is shown how, in order to maximize the efficiency,
+C<Number::AnyBase> can freely choose the bignum library to use: in this case the
+excellent C<Math::Int128> (which fits perfectly, being an UUID exactly 128-bit
+long).
+
+    use strict;
+    use warnings;
+    
+    use feature 'say';
+    
+    use Math::Int128 qw(string_to_uint128); # For maximum speed
+    use Data::UUID;
+    use Number::AnyBase;
+    
+    $| = 1;
+    
+    my $uuid = Data::UUID->new->create_hex;
+    my $dec_uuid = string_to_uint128($uuid);
+    
+    # Let's try several compressions
+    my $base64url_uuid = Number::AnyBase->new_base64url->to_base($dec_uuid);
+    my $urisafe_uuid   = Number::AnyBase->new_urisafe->to_base($dec_uuid);
+    my $ascii_uuid     = Number::AnyBase->new_ascii->to_base($dec_uuid);
+    
+    # Check the length
+    say length($uuid) - 2;      # Original length (32)
+    say length $base64url_uuid; # Max. 22, better than standard Base64
+    say length $urisafe_uuid;   # Max. 22, sometimes better than the previous
+    say length $ascii_uuid;     # Max. 20, better than standard Base85
 
 =head2 Security
 
@@ -745,6 +918,9 @@ work on arbitrarily big numbers without any external module.
 * L<Math::BaseCalc>
 * L<Math::BaseConvert>
 * L<Math::Base::Convert>
+* L<Math::BigInt>
+* L<Math::GMP>
+* L<Math::Int128>
 
 =head1 BUGS
 
